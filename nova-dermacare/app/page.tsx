@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 
 export default function HomePage() {
   const glassRef = useRef<HTMLDivElement>(null);
@@ -25,24 +26,29 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
+  // ⭐ ALWAYS start at the top when page loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   return (
     <div
       style={{
         minHeight: "100vh",
-        padding: "60px 20px",
+        padding: "40px 20px",
         position: "relative",
-        overflow: "hidden",
+        overflowX: "hidden",
         color: "white",
         fontFamily: "Inter, sans-serif",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
         textAlign: "center",
       }}
     >
 
-      {/* ⭐ ZOOMED‑OUT, MULTI‑COLOR MOVING BLOBS */}
+      {/* ⭐ BACKGROUND BLOBS */}
       <div className="liquid-bg">
         <div className="blob blob1"></div>
         <div className="blob blob2"></div>
@@ -58,7 +64,7 @@ export default function HomePage() {
         style={{
           position: "absolute",
           left: "33%",
-          top: "12%",
+          top: "5%",
           width: "150px",
           zIndex: 2,
           animation: "ballOpposite 6s ease-in-out infinite",
@@ -67,14 +73,14 @@ export default function HomePage() {
         }}
       />
 
-      {/* ⭐ USB FLOATING */}
+      {/* ⭐ USB FLOATING — MOVED HIGHER */}
       <img
         src="/usbphoto.png"
         alt="USB Device"
         style={{
           position: "absolute",
           left: "10%",
-          top: "50%",
+          top: "35%",
           width: "300px",
           opacity: 0.7,
           animation: "usbFloat 6s ease-in-out infinite",
@@ -101,9 +107,10 @@ export default function HomePage() {
         }}
       />
 
-      {/* ⭐ SQUIRCLE */}
+      {/* ⭐ HERO SECTION — REDUCED TOP SPACE */}
       <div
         style={{
+          width: "100%",
           maxWidth: 650,
           padding: "45px 35px",
           borderRadius: 28,
@@ -116,6 +123,8 @@ export default function HomePage() {
           position: "relative",
           zIndex: 5,
           overflow: "hidden",
+          marginTop: "120px",
+          marginBottom: 140,
         }}
       >
 
@@ -224,11 +233,215 @@ export default function HomePage() {
         >
           Start Skin Scan
         </button>
+
+        {/* ⭐ SCROLL DOWN INDICATOR */}
+        <div
+          style={{
+            marginTop: 40,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            opacity: 0.85,
+            animation: "fadeIn 1.5s ease-out forwards",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 16,
+              marginBottom: 8,
+              letterSpacing: "0.5px",
+            }}
+          >
+            Scroll for more info
+          </div>
+
+          <div
+            style={{
+              width: 24,
+              height: 24,
+              borderLeft: "3px solid #cfe2ff",
+              borderBottom: "3px solid #cfe2ff",
+              transform: "rotate(-45deg)",
+              animation: "arrowBounce 1.6s infinite ease-in-out",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ⭐ ARTICLES SECTION — HORIZONTAL CARDS */}
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 900,
+          marginTop: 20,
+          padding: "0 20px",
+          zIndex: 5,
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 36,
+            fontWeight: 800,
+            marginBottom: 30,
+            background: "linear-gradient(90deg, #d8e6ff, #f0f6ff)",
+            WebkitBackgroundClip: "text",
+            color: "transparent",
+            textAlign: "left",
+          }}
+        >
+          Articles & Skin Education
+        </h2>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+          {/* CARD 1 */}
+          <Link href="/articles/first-scan" style={{ textDecoration: "none", color: "inherit" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 25,
+                background: "rgba(255,255,255,0.06)",
+                borderRadius: 18,
+                padding: 20,
+                border: "1px solid rgba(255,255,255,0.10)",
+                backdropFilter: "blur(20px)",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <img
+                src="/article1.png"
+                style={{
+                  width: 260,
+                  height: 180,
+                  objectFit: "cover",
+                  borderRadius: 14,
+                }}
+              />
+              <div style={{ textAlign: "left", maxWidth: 500 }}>
+                <h3 style={{ fontSize: 20, marginBottom: 6 }}>
+                  Your First Scan: How to Get the Most Accurate Results
+                </h3>
+                <p style={{ opacity: 0.75, fontSize: 14, marginBottom: 6 }}>
+                  A quick guide to capturing the clearest, most reliable skin scan.
+                </p>
+                <p style={{ opacity: 0.55, fontSize: 12 }}>5‑MIN READ</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* CARD 2 */}
+          <Link href="/articles/teen-misdiagnosis" style={{ textDecoration: "none", color: "inherit" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 25,
+                background: "rgba(255,255,255,0.06)",
+                borderRadius: 18,
+                padding: 20,
+                border: "1px solid rgba(255,255,255,0.10)",
+                backdropFilter: "blur(20px)",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <img
+                src="/article2.png"
+                style={{
+                  width: 260,
+                  height: 180,
+                  objectFit: "cover",
+                  borderRadius: 14,
+                }}
+              />
+              <div style={{ textAlign: "left", maxWidth: 500 }}>
+                <h3 style={{ fontSize: 20, marginBottom: 6 }}>
+                  The Hidden Crisis: Teen Skin Misdiagnosis in the Age of Social Media
+                </h3>
+                <p style={{ opacity: 0.75, fontSize: 14, marginBottom: 6 }}>
+                  How trends and misinformation are shaping teen skin health.
+                </p>
+                <p style={{ opacity: 0.55, fontSize: 12 }}>5‑MIN READ</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* CARD 3 */}
+          <Link href="/articles/skin-myths" style={{ textDecoration: "none", color: "inherit" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 25,
+                background: "rgba(255,255,255,0.06)",
+                borderRadius: 18,
+                padding: 20,
+                border: "1px solid rgba(255,255,255,0.10)",
+                backdropFilter: "blur(20px)",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <img
+                src="/article3.png"
+                style={{
+                  width: 260,
+                  height: 180,
+                  objectFit: "cover",
+                  borderRadius: 14,
+                }}
+              />
+              <div style={{ textAlign: "left", maxWidth: 500 }}>
+                <h3 style={{ fontSize: 20, marginBottom: 6 }}>
+                  Mythbusting: The 15 Biggest Skin Health Myths, Debunked
+                </h3>
+                <p style={{ opacity: 0.75, fontSize: 14, marginBottom: 6 }}>
+                  Separating fact from fiction in everyday skincare advice.
+                </p>
+                <p style={{ opacity: 0.55, fontSize: 12 }}>5‑MIN READ</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* CARD 4 */}
+          <Link href="/articles/dermatology-deserts" style={{ textDecoration: "none", color: "inherit" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 25,
+                background: "rgba(255,255,255,0.06)",
+                borderRadius: 18,
+                padding: 20,
+                border: "1px solid rgba(255,255,255,0.10)",
+                backdropFilter: "blur(20px)",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <img
+                src="/article4.png"
+                style={{
+                  width: 260,
+                  height: 180,
+                  objectFit: "cover",
+                  borderRadius: 14,
+                }}
+              />
+              <div style={{ textAlign: "left", maxWidth: 500 }}>
+                <h3 style={{ fontSize: 20, marginBottom: 6 }}>
+                  Where Skin Care Is Out of Reach: Understanding Dermatology Deserts
+                </h3>
+                <p style={{ opacity: 0.75, fontSize: 14, marginBottom: 6 }}>
+                  Why millions lack access to dermatologists — and what it means.
+                </p>
+                <p style={{ opacity: 0.55, fontSize: 12 }}>5‑MIN READ</p>
+              </div>
+            </div>
+          </Link>
+
+        </div>
       </div>
 
       {/* ⭐ Animations + Blob Styles */}
       <style>{`
-        /* ⭐ ZOOMED‑OUT, MULTI‑COLOR MOVING BLOBS */
         .liquid-bg {
           position: absolute;
           inset: 0;
@@ -287,6 +500,12 @@ export default function HomePage() {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
+        }
+
+        @keyframes arrowBounce {
+          0% { transform: translateY(0) rotate(-45deg); }
+          50% { transform: translateY(10px) rotate(-45deg); }
+          100% { transform: translateY(0) rotate(-45deg); }
         }
       `}</style>
     </div>
