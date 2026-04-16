@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 
 export default function HomePage() {
-  const glassRef = useRef(null);
-  const ballRef = useRef(null);
+  const glassRef = useRef<HTMLDivElement>(null);
+  const ballRef = useRef<HTMLImageElement>(null);
 
   // ⭐ Move refraction hotspot to follow the ball
   useEffect(() => {
@@ -234,26 +234,24 @@ export default function HomePage() {
           inset: 0;
           overflow: hidden;
           z-index: 0;
-          background: #020513; /* deep navy base */
+          background: #020513;
         }
 
         .blob {
           position: absolute;
-          width: 120vw;   /* ⭐ MUCH smaller → more blobs visible */
+          width: 120vw;
           height: 120vw;
           border-radius: 50%;
           filter: blur(160px);
-          opacity: 0.50;  /* ⭐ more visible */
+          opacity: 0.50;
           animation: blobMove 30s ease-in-out infinite;
         }
 
-        /* ⭐ More distinct dark‑blue tones */
         .blob1 { background: #0a1538; top: -10%; left: -10%; animation-delay: 0s; }
         .blob2 { background: #1b2f6b; top: -20%; right: -10%; animation-delay: 6s; }
         .blob3 { background: #2d4aa0; bottom: -15%; left: -5%; animation-delay: 12s; }
         .blob4 { background: #0f1f4d; bottom: -10%; right: -5%; animation-delay: 18s; }
 
-        /* ⭐ MUCH more obvious movement */
         @keyframes blobMove {
           0%   { transform: translate(0px, 0px) scale(1); }
           25%  { transform: translate(400px, -350px) scale(1.35); }
@@ -262,21 +260,18 @@ export default function HomePage() {
           100% { transform: translate(0px, 0px) scale(1); }
         }
 
-        /* ⭐ Ball moves opposite USB/scanner */
         @keyframes ballOpposite {
           0% { transform: translateY(-40px); }
           50% { transform: translateY(40px); }
           100% { transform: translateY(-40px); }
         }
 
-        /* ⭐ USB moves + blurs at top */
         @keyframes usbFloat {
           0% { transform: translateY(-50%); filter: blur(0px); }
           50% { transform: translateY(-70%); filter: blur(3px); }
           100% { transform: translateY(-50%); filter: blur(0px); }
         }
 
-        /* ⭐ Scanner synced with USB */
         @keyframes scannerFloat {
           0% { transform: translateY(-50%); }
           50% { transform: translateY(-70%); }
