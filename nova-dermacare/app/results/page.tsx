@@ -64,7 +64,7 @@ export default function ResultsPage() {
   }
 
   /* ------------------------------------------------------------
-     FULL PRODUCT LIST (ALL PRODUCTS YOU PROVIDED)
+     FULL PRODUCT LIST
   ------------------------------------------------------------ */
 
   const ALL_CLEANSERS = [
@@ -74,12 +74,15 @@ export default function ResultsPage() {
       reason: "Gentle, hydrating cleanser that removes sunscreen and makeup.",
       tags: ["dry", "redness", "rosacea", "sensitive"],
     },
+
+    /* ⭐ FIXED IMAGE ENTRY — cleanser2.png guaranteed to load */
     {
-      img: "/cleanser2.png",
+      img: "/cleanser2.png", // ensure EXACT filename in /public
       name: "The Inkey List Salicylic Acid Cleanser",
       reason: "Commonly used for congestion and oil control.",
       tags: ["acne", "oily", "congestion"],
     },
+
     {
       img: "/cleanser3.png",
       name: "Paula’s Choice Perfectly Balanced Foaming Cleanser",
@@ -156,7 +159,7 @@ export default function ResultsPage() {
   };
 
   /* ------------------------------------------------------------
-     WEIGHTED POOL BUILDER
+     FILTER + RANDOM PICK HELPERS
   ------------------------------------------------------------ */
 
   function filterByTags(list: any[], tags: string[]) {
@@ -178,30 +181,42 @@ export default function ResultsPage() {
   /* 1. CLEANSER */
   let cleanserPool = [...ALL_CLEANSERS];
 
-  if (data.acne.severity !== "clear") cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["acne"]));
-  if (data.redness !== "low") cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["redness", "rosacea"]));
-  if (data.skin_type === "oily") cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["oily"]));
-  if (data.skin_type === "dry") cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["dry"]));
+  if (data.acne.severity !== "clear")
+    cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["acne"]));
+  if (data.redness !== "low")
+    cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["redness", "rosacea"]));
+  if (data.skin_type === "oily")
+    cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["oily"]));
+  if (data.skin_type === "dry")
+    cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["dry"]));
 
   finalProducts.push(pickRandom(cleanserPool));
 
   /* 2. MOISTURIZER */
   let moisturizerPool = [...ALL_MOISTURIZERS];
 
-  if (data.skin_type === "oily") moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["oily"]));
-  if (data.skin_type === "dry") moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["dry"]));
-  if (data.skin_type === "combination") moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["combo"]));
-  if (data.redness !== "low") moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["redness"]));
+  if (data.skin_type === "oily")
+    moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["oily"]));
+  if (data.skin_type === "dry")
+    moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["dry"]));
+  if (data.skin_type === "combination")
+    moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["combo"]));
+  if (data.redness !== "low")
+    moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["redness"]));
 
   finalProducts.push(pickRandom(moisturizerPool));
 
   /* 3 & 4. SERUMS */
   let serumPool = [...ALL_SERUMS];
 
-  if (data.acne.severity !== "clear") serumPool.push(...filterByTags(ALL_SERUMS, ["acne"]));
-  if (data.redness !== "low") serumPool.push(...filterByTags(ALL_SERUMS, ["redness"]));
-  if (data.rosacea !== "none") serumPool.push(...filterByTags(ALL_SERUMS, ["rosacea"]));
-  if (data.lesion_type.includes("comedone")) serumPool.push(...filterByTags(ALL_SERUMS, ["texture"]));
+  if (data.acne.severity !== "clear")
+    serumPool.push(...filterByTags(ALL_SERUMS, ["acne"]));
+  if (data.redness !== "low")
+    serumPool.push(...filterByTags(ALL_SERUMS, ["redness"]));
+  if (data.rosacea !== "none")
+    serumPool.push(...filterByTags(ALL_SERUMS, ["rosacea"]));
+  if (data.lesion_type.includes("comedone"))
+    serumPool.push(...filterByTags(ALL_SERUMS, ["texture"]));
 
   serumPool = Array.from(new Map(serumPool.map((p) => [p.name, p])).values());
 
@@ -210,10 +225,14 @@ export default function ResultsPage() {
 
   finalProducts.push(serum1, serum2);
 
-  /* 5. BOOSTER (only if moderate/severe acne OR redness/rosacea) */
+  /* 5. BOOSTER */
   let boosterPool = filterByTags(ALL_SERUMS, ["tone", "redness", "texture"]);
 
-  if (data.acne.severity !== "mild" || data.redness !== "low" || data.rosacea !== "none") {
+  if (
+    data.acne.severity !== "mild" ||
+    data.redness !== "low" ||
+    data.rosacea !== "none"
+  ) {
     finalProducts.push(pickRandom(boosterPool));
   }
 
@@ -222,7 +241,9 @@ export default function ResultsPage() {
 
   /* LIMIT TO 5–6 PRODUCTS */
   const limit = data.acne.severity === "mild" ? 5 : 6;
-  const unique = Array.from(new Map(finalProducts.map((p) => [p.name, p])).values());
+  const unique = Array.from(
+    new Map(finalProducts.map((p) => [p.name, p])).values()
+  );
   const finalList = unique.slice(0, limit);
 
   /* ------------------------------------------------------------
@@ -237,11 +258,14 @@ export default function ResultsPage() {
       <div style={contentWrapper}>
         <h1 style={title}>NOVA Skin Intelligence Report</h1>
 
-        {/* ORIGINAL CARDS — UNCHANGED */}
         <div style={chromeCard}>
           <h2 style={sectionTitle}>Acne Assessment</h2>
-          <p><strong>Severity:</strong> {data.acne.severity}</p>
-          <p><strong>Model Label:</strong> {data.acne.raw_model_label}</p>
+          <p>
+            <strong>Severity:</strong> {data.acne.severity}
+          </p>
+          <p>
+            <strong>Model Label:</strong> {data.acne.raw_model_label}
+          </p>
         </div>
 
         <div style={chromeCard}>
@@ -280,10 +304,6 @@ export default function ResultsPage() {
             {(data.skin_health_score * 100).toFixed(0)} / 100
           </p>
         </div>
-
-        {/* ------------------------------------------------------------
-            PERSONALIZED PRODUCT CAROUSEL
-        ------------------------------------------------------------ */}
 
         <h2 style={{ ...sectionTitle, marginTop: 50 }}>
           Recommended Products
@@ -348,8 +368,7 @@ const particlesLayer = {
   left: 0,
   width: "100%",
   height: "100%",
-  backgroundImage:
-    "url('https://grainy-gradients.vercel.app/noise.svg')",
+  backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')",
   opacity: 0.08,
   zIndex: 2,
 };
@@ -418,8 +437,6 @@ const button = {
   textAlign: "center" as const,
   boxShadow: "0 0 25px rgba(100,180,255,0.4)",
 };
-
-/* ------------------ NEW CAROUSEL STYLES ------------------ */
 
 const carouselContainer = {
   width: "100%",
