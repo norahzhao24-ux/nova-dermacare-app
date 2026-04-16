@@ -75,9 +75,9 @@ export default function ResultsPage() {
       tags: ["dry", "redness", "rosacea", "sensitive"],
     },
 
-    /* ⭐ FIXED IMAGE ENTRY — cleanser2.png guaranteed to load */
+    /* ⭐ FIXED — matches your actual file Cleanser2.png */
     {
-      img: "/cleanser2.png", // ensure EXACT filename in /public
+      img: "/Cleanser2.png",
       name: "The Inkey List Salicylic Acid Cleanser",
       reason: "Commonly used for congestion and oil control.",
       tags: ["acne", "oily", "congestion"],
