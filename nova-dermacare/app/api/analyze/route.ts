@@ -4,9 +4,8 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    // Read form-data from the incoming request
     const form = await req.formData();
-    const file = form.get("file") as File;
+    const file = form.get("file") as File | null;
 
     if (!file) {
       return new Response(JSON.stringify({ error: "No file uploaded" }), {
@@ -14,22 +13,29 @@ export async function POST(req: Request) {
       });
     }
 
-    // Prepare form-data to send to FastAPI
+    // IMPORTANT: Replace this with your REAL FastAPI URL
+    const FASTAPI_URL = process.env.FASTAPI_URL || "https://YOUR-BACKEND-URL/predict";
+
     const backendForm = new FormData();
     backendForm.append("file", file);
 
-    // Send to FastAPI backend
-    const response = await fetch("http://127.0.0.1:8002/predict", {
+    const response = await fetch(FASTAPI_URL, {
       method: "POST",
       body: backendForm,
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+      return new Response(JSON.stringify({ error: "Backend error" }), {
+        status: 500,
+      });
+    }
 
+    const data = await response.json();
     return new Response(JSON.stringify(data), { status: 200 });
+
   } catch (err) {
     console.error("Error forwarding to FastAPI:", err);
-    return new Response(JSON.stringify({ error: "Backend error" }), {
+    return new Response(JSON.stringify({ error: "Server error" }), {
       status: 500,
     });
   }
