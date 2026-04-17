@@ -32,7 +32,7 @@ export default function ScanPage() {
     formData.append("file", file);
 
     try {
-      // ⭐ UPDATED — now calling your Render backend
+      // ⭐ Calls your Render backend
       const res = await fetch("https://nova-backend-z5l9.onrender.com/predict", {
         method: "POST",
         body: formData,
