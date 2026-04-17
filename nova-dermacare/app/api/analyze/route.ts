@@ -9,8 +9,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // ⭐ Replace this with your ngrok URL
-    const FASTAPI_URL = "https://YOUR-NGROK-URL.ngrok.io/predict";
+    const FASTAPI_URL = "https://judicial-overbid-rebuilt.ngrok-free.dev/predict";
 
     const backendForm = new FormData();
     backendForm.append("file", file);
