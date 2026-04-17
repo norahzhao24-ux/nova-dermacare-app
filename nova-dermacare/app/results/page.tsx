@@ -27,6 +27,33 @@ interface AnalysisResult {
 export default function ResultsPage() {
   const [data, setData] = useState<AnalysisResult | null>(null);
 
+  /* ------------------------------------------------------------
+     ⭐ NEW SKIN HEALTH SCORE FUNCTION
+  ------------------------------------------------------------ */
+  function computeSkinHealth(acne: string, redness: string, rosacea: string) {
+    let score = 100;
+
+    // Acne severity penalties
+    if (acne === "severe") score -= 40;
+    else if (acne === "moderate") score -= 25;
+    else if (acne === "mild") score -= 10;
+
+    // Redness penalties
+    if (redness === "high") score -= 25;
+    else if (redness === "medium") score -= 10;
+
+    // Rosacea penalties
+    if (rosacea === "severe") score -= 30;
+    else if (rosacea === "moderate") score -= 15;
+    else if (rosacea === "mild") score -= 5;
+
+    // Clamp 0–100
+    score = Math.max(0, Math.min(100, score));
+
+    // Convert to 0–1 for progress bar
+    return score / 100;
+  }
+
   useEffect(() => {
     const stored = localStorage.getItem("analysisResult");
     if (!stored) return;
@@ -43,10 +70,13 @@ export default function ResultsPage() {
         skin_type: parsed.skin_type ?? "unknown",
         redness: parsed.redness_level ?? "unknown",
         lesion_type: parsed.lesion_type ?? "unknown",
-        skin_health_score:
-          parsed.skin_health_score != null
-            ? parsed.skin_health_score / 100
-            : 0.5,
+
+        // ⭐ USE NEW COMPUTED SCORE
+        skin_health_score: computeSkinHealth(
+          parsed.acne_severity ?? "unknown",
+          parsed.redness_level ?? "unknown",
+          parsed.rosacea ?? "unknown"
+        ),
       };
 
       setData(mapped);
@@ -64,7 +94,7 @@ export default function ResultsPage() {
   }
 
   /* ------------------------------------------------------------
-     FULL PRODUCT LIST
+     PRODUCT LISTS (UNCHANGED EXCEPT cleanser2 FIX)
   ------------------------------------------------------------ */
 
   const ALL_CLEANSERS = [
@@ -75,7 +105,7 @@ export default function ResultsPage() {
       tags: ["dry", "redness", "rosacea", "sensitive"],
     },
 
-    /* ⭐ FIXED — matches your actual file Cleanser2.png */
+    // ⭐ FIXED — matches your actual file Cleanser2.png
     {
       img: "/Cleanser2.png",
       name: "The Inkey List Salicylic Acid Cleanser",
