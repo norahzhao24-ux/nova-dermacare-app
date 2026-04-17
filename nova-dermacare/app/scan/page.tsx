@@ -36,10 +36,15 @@ export default function ScanPage() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://127.0.0.1:8010/predict", {
+      // ⭐ FIXED: Send to Vercel API route instead of localhost
+      const res = await fetch("/api/analyze", {
         method: "POST",
         body: formData,
       });
+
+      if (!res.ok) {
+        throw new Error("API error");
+      }
 
       const result = await res.json();
       localStorage.setItem("analysisResult", JSON.stringify(result));

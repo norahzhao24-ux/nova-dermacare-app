@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 
 interface BackendResponse {
-  acne_severity?: string;        // now: texture descriptor
-  model_label?: string;          // raw model output
-  rosacea?: string;              // now: redness descriptor
-  skin_type?: string;            // now: shine/brightness descriptor
-  redness_level?: string;        // low / moderate / high redness
-  lesion_type?: string;          // texture cluster descriptor
-  skin_health_score?: number;    // 0–100 visual score
+  acne_severity?: string;
+  model_label?: string;
+  rosacea?: string;
+  skin_type?: string;
+  redness_level?: string;
+  lesion_type?: string;
+  skin_health_score?: number;
 }
 
 interface AnalysisResult {
@@ -27,6 +27,32 @@ interface AnalysisResult {
 export default function ResultsPage() {
   const [data, setData] = useState<AnalysisResult | null>(null);
 
+  /* ------------------------------------------------------------
+     ⭐ COMPUTE SKIN HEALTH SCORE (0–1)
+  ------------------------------------------------------------ */
+  function computeSkinHealth(acne: string, redness: string, rosacea: string) {
+    let score = 100;
+
+    // Acne severity penalties
+    if (acne === "severe") score -= 40;
+    else if (acne === "moderate") score -= 25;
+    else if (acne === "mild") score -= 10;
+
+    // Redness penalties
+    if (redness === "high") score -= 25;
+    else if (redness === "medium") score -= 10;
+
+    // Rosacea penalties
+    if (rosacea === "severe") score -= 30;
+    else if (rosacea === "moderate") score -= 15;
+    else if (rosacea === "mild") score -= 5;
+
+    return Math.max(0, Math.min(100, score)) / 100;
+  }
+
+  /* ------------------------------------------------------------
+     LOAD STORED ANALYSIS
+  ------------------------------------------------------------ */
   useEffect(() => {
     const stored = localStorage.getItem("analysisResult");
     if (!stored) return;
@@ -37,16 +63,19 @@ export default function ResultsPage() {
       const mapped: AnalysisResult = {
         acne: {
           raw_model_label: parsed.model_label ?? "unknown",
-          severity: parsed.acne_severity ?? "visual texture unavailable",
+          severity: parsed.acne_severity ?? "unknown",
         },
-        rosacea: parsed.rosacea ?? "no redness information available",
-        skin_type: parsed.skin_type ?? "appearance not analyzed",
-        redness: parsed.redness_level ?? "no redness data",
-        lesion_type: parsed.lesion_type ?? "texture not analyzed",
-        skin_health_score:
-          parsed.skin_health_score != null
-            ? parsed.skin_health_score / 100
-            : 0.5,
+        rosacea: parsed.rosacea ?? "unknown",
+        skin_type: parsed.skin_type ?? "unknown",
+        redness: parsed.redness_level ?? "unknown",
+        lesion_type: parsed.lesion_type ?? "unknown",
+
+        // ⭐ ALWAYS USE COMPUTED SCORE
+        skin_health_score: computeSkinHealth(
+          parsed.acne_severity ?? "unknown",
+          parsed.redness_level ?? "unknown",
+          parsed.rosacea ?? "unknown"
+        ),
       };
 
       setData(mapped);
@@ -75,7 +104,7 @@ export default function ResultsPage() {
       tags: ["dry", "redness", "rosacea", "sensitive"],
     },
     {
-      img: "/cleanser2.png",
+      img: "/Cleanser2.png", // ⭐ FIXED CAPITALIZATION
       name: "The Inkey List Salicylic Acid Cleanser",
       reason: "Commonly used for congestion and oil control.",
       tags: ["acne", "oily", "congestion"],
@@ -156,7 +185,7 @@ export default function ResultsPage() {
   };
 
   /* ------------------------------------------------------------
-     PRODUCT SELECTION HELPERS
+     FILTER HELPERS
   ------------------------------------------------------------ */
 
   function filterByTags(list: any[], tags: string[]) {
@@ -170,7 +199,7 @@ export default function ResultsPage() {
   }
 
   /* ------------------------------------------------------------
-     BUILD PERSONALIZED PRODUCT SET
+     BUILD PRODUCT RECOMMENDATIONS
   ------------------------------------------------------------ */
 
   const finalProducts: any[] = [];
@@ -178,16 +207,16 @@ export default function ResultsPage() {
   /* 1. CLEANSER */
   let cleanserPool = [...ALL_CLEANSERS];
 
-  if (data.acne.severity !== "smooth surface appearance")
+  if (data.acne.severity !== "clear")
     cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["acne"]));
 
-  if (data.redness !== "low redness")
+  if (data.redness !== "low")
     cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["redness", "rosacea"]));
 
-  if (data.skin_type.includes("shine"))
+  if (data.skin_type === "oily")
     cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["oily"]));
 
-  if (data.skin_type.includes("matte"))
+  if (data.skin_type === "dry")
     cleanserPool.push(...filterByTags(ALL_CLEANSERS, ["dry"]));
 
   finalProducts.push(pickRandom(cleanserPool));
@@ -195,13 +224,16 @@ export default function ResultsPage() {
   /* 2. MOISTURIZER */
   let moisturizerPool = [...ALL_MOISTURIZERS];
 
-  if (data.skin_type.includes("shine"))
+  if (data.skin_type === "oily")
     moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["oily"]));
 
-  if (data.skin_type.includes("matte"))
+  if (data.skin_type === "dry")
     moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["dry"]));
 
-  if (data.redness !== "low redness")
+  if (data.skin_type === "combination")
+    moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["combo"]));
+
+  if (data.redness !== "low")
     moisturizerPool.push(...filterByTags(ALL_MOISTURIZERS, ["redness"]));
 
   finalProducts.push(pickRandom(moisturizerPool));
@@ -209,14 +241,17 @@ export default function ResultsPage() {
   /* 3 & 4. SERUMS */
   let serumPool = [...ALL_SERUMS];
 
-  if (data.acne.severity !== "smooth surface appearance")
-    serumPool.push(...filterByTags(ALL_SERUMS, ["texture"]));
+  if (data.acne.severity !== "clear")
+    serumPool.push(...filterByTags(ALL_SERUMS, ["acne"]));
 
-  if (data.redness !== "low redness")
+  if (data.redness !== "low")
     serumPool.push(...filterByTags(ALL_SERUMS, ["redness"]));
 
-  if (data.rosacea !== "no elevated redness detected")
+  if (data.rosacea !== "none")
     serumPool.push(...filterByTags(ALL_SERUMS, ["rosacea"]));
+
+  if (data.lesion_type.includes("texture"))
+    serumPool.push(...filterByTags(ALL_SERUMS, ["texture"]));
 
   serumPool = Array.from(new Map(serumPool.map((p) => [p.name, p])).values());
 
@@ -229,9 +264,9 @@ export default function ResultsPage() {
   let boosterPool = filterByTags(ALL_SERUMS, ["tone", "redness", "texture"]);
 
   if (
-    data.acne.severity !== "smooth surface appearance" ||
-    data.redness !== "low redness" ||
-    data.rosacea !== "no elevated redness detected"
+    data.acne.severity !== "clear" ||
+    data.redness !== "low" ||
+    data.rosacea !== "none"
   ) {
     finalProducts.push(pickRandom(boosterPool));
   }
@@ -240,7 +275,7 @@ export default function ResultsPage() {
   finalProducts.push(SUNSCREEN);
 
   /* LIMIT TO 5–6 PRODUCTS */
-  const limit = data.acne.severity === "slightly uneven surface texture" ? 5 : 6;
+  const limit = data.acne.severity === "mild" ? 5 : 6;
   const unique = Array.from(new Map(finalProducts.map((p) => [p.name, p])).values());
   const finalList = unique.slice(0, limit);
 
@@ -257,9 +292,9 @@ export default function ResultsPage() {
         <h1 style={title}>NOVA Skin Visual Analysis Report</h1>
 
         <div style={chromeCard}>
-          <h2 style={sectionTitle}>Surface Texture</h2>
-          <p><strong>Description:</strong> {data.acne.severity}</p>
-          <p><strong>Model Output:</strong> {data.acne.raw_model_label}</p>
+          <h2 style={sectionTitle}>Acne Assessment</h2>
+          <p><strong>Severity:</strong> {data.acne.severity}</p>
+          <p><strong>Model Label:</strong> {data.acne.raw_model_label}</p>
         </div>
 
         <div style={chromeCard}>
@@ -362,8 +397,7 @@ const particlesLayer = {
   left: 0,
   width: "100%",
   height: "100%",
-  backgroundImage:
-    "url('https://grainy-gradients.vercel.app/noise.svg')",
+  backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')",
   opacity: 0.08,
   zIndex: 2,
 };
