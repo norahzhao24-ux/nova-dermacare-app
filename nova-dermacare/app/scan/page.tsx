@@ -13,18 +13,14 @@ export default function ScanPage() {
     const selected = e.target.files[0];
     if (!selected) return;
 
-    // ⭐ Allowed formats
     const allowedTypes = ["image/jpeg", "image/png"];
-
     if (!allowedTypes.includes(selected.type)) {
       alert("We only support JPG and PNG formats. Thanks!");
       return;
     }
 
     setFile(selected);
-
-    const url = URL.createObjectURL(selected);
-    setPreview(url);
+    setPreview(URL.createObjectURL(selected));
   };
 
   const analyzeImage = async () => {
@@ -36,8 +32,8 @@ export default function ScanPage() {
     formData.append("file", file);
 
     try {
-      // ⭐ FIXED: Send to Vercel API route instead of localhost
-      const res = await fetch("/api/analyze", {
+      // ⭐ UPDATED — now calling your Render backend
+      const res = await fetch("https://nova-backend-z5l9.onrender.com/predict", {
         method: "POST",
         body: formData,
       });
@@ -49,7 +45,6 @@ export default function ScanPage() {
       const result = await res.json();
       localStorage.setItem("analysisResult", JSON.stringify(result));
 
-      // ⭐ Redirect to loading page
       router.push("/loading");
 
     } catch (err) {
@@ -97,7 +92,6 @@ export default function ScanPage() {
             boxShadow: "0 0 40px rgba(0, 150, 255, 0.15)",
           }}
         >
-          {/* Back to Home Button */}
           <button
             onClick={() => router.push("/")}
             style={{
@@ -123,7 +117,6 @@ export default function ScanPage() {
             ← Back to Home
           </button>
 
-          {/* Upload Button */}
           <label
             style={{
               display: "block",
@@ -147,14 +140,12 @@ export default function ScanPage() {
             />
           </label>
 
-          {/* File Name */}
           {file && (
             <p style={{ marginBottom: 15, opacity: 0.8, fontSize: 15 }}>
               Selected: <strong>{file.name}</strong>
             </p>
           )}
 
-          {/* Image Preview */}
           {preview && (
             <img
               src={preview}
@@ -168,7 +159,6 @@ export default function ScanPage() {
             />
           )}
 
-          {/* Analyze Button */}
           <button
             onClick={analyzeImage}
             disabled={loading}
@@ -176,11 +166,7 @@ export default function ScanPage() {
               width: "100%",
               padding: "14px 20px",
               borderRadius: 12,
-              background: loading
-                ? "linear-gradient(90deg, #4db8ff, #7ecbff, #b0e0ff)"
-                : "linear-gradient(90deg, #4db8ff, #7ecbff, #b0e0ff)",
-              backgroundSize: loading ? "300% 300%" : "100% 100%",
-              animation: loading ? "gradientMove 2s infinite" : "none",
+              background: "linear-gradient(90deg, #4db8ff, #7ecbff, #b0e0ff)",
               color: "#0a0f2d",
               fontWeight: 600,
               fontSize: 18,
@@ -188,53 +174,12 @@ export default function ScanPage() {
               cursor: loading ? "default" : "pointer",
               boxShadow: "0 0 20px rgba(100,180,255,0.4)",
               transition: "0.3s",
-              position: "relative",
-              overflow: "hidden",
             }}
           >
-            {loading ? (
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <span className="dot" />
-                <span className="dot" />
-                <span className="dot" />
-              </div>
-            ) : (
-              "Analyze with NOVA"
-            )}
+            {loading ? "Analyzing..." : "Analyze with NOVA"}
           </button>
         </div>
       </div>
-
-      {/* Animations */}
-      <style>{`
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-6px); }
-        }
-
-        .dot {
-          width: 8px;
-          height: 8px;
-          margin: 0 4px;
-          background: #0a0f2d;
-          border-radius: 50%;
-          animation: bounce 0.6s infinite;
-        }
-
-        .dot:nth-child(2) {
-          animation-delay: 0.15s;
-        }
-
-        .dot:nth-child(3) {
-          animation-delay: 0.3s;
-        }
-
-        @keyframes gradientMove {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-      `}</style>
     </div>
   );
 }
