@@ -28,6 +28,33 @@ export default function ResultsPage() {
   const [data, setData] = useState<AnalysisResult | null>(null);
 
   /* ------------------------------------------------------------
+     ⭐ NORMALIZATION HELPERS (NEW)
+  ------------------------------------------------------------ */
+  function normalizeAcneSeverity(label: string) {
+    const lower = label.toLowerCase();
+    if (lower.includes("severe")) return "severe";
+    if (lower.includes("moderate")) return "moderate";
+    if (lower.includes("mild")) return "mild";
+    if (lower.includes("clear")) return "clear";
+    return "unknown";
+  }
+
+  function normalizeRedness(label: string) {
+    const lower = label.toLowerCase();
+    if (lower.includes("high")) return "high";
+    if (lower.includes("moderate")) return "medium";
+    if (lower.includes("mild")) return "mild";
+    return "low";
+  }
+
+  function normalizeRosacea(label: string) {
+    const lower = label.toLowerCase();
+    if (lower.includes("possible")) return "moderate";
+    if (lower.includes("none")) return "none";
+    return "mild";
+  }
+
+  /* ------------------------------------------------------------
      ⭐ COMPUTE SKIN HEALTH SCORE (0–1)
   ------------------------------------------------------------ */
   function computeSkinHealth(acne: string, redness: string, rosacea: string) {
@@ -60,22 +87,23 @@ export default function ResultsPage() {
     try {
       const parsed: BackendResponse = JSON.parse(stored);
 
+      // ⭐ Normalize backend values
+      const acneNorm = normalizeAcneSeverity(parsed.acne_severity ?? "unknown");
+      const redNorm = normalizeRedness(parsed.redness_level ?? "unknown");
+      const rosNorm = normalizeRosacea(parsed.rosacea ?? "unknown");
+
       const mapped: AnalysisResult = {
         acne: {
           raw_model_label: parsed.model_label ?? "unknown",
-          severity: parsed.acne_severity ?? "unknown",
+          severity: acneNorm,
         },
-        rosacea: parsed.rosacea ?? "unknown",
+        rosacea: rosNorm,
         skin_type: parsed.skin_type ?? "unknown",
-        redness: parsed.redness_level ?? "unknown",
+        redness: redNorm,
         lesion_type: parsed.lesion_type ?? "unknown",
 
-        // ⭐ ALWAYS USE COMPUTED SCORE
-        skin_health_score: computeSkinHealth(
-          parsed.acne_severity ?? "unknown",
-          parsed.redness_level ?? "unknown",
-          parsed.rosacea ?? "unknown"
-        ),
+        // ⭐ Use computed score with normalized values
+        skin_health_score: computeSkinHealth(acneNorm, redNorm, rosNorm),
       };
 
       setData(mapped);
@@ -104,7 +132,7 @@ export default function ResultsPage() {
       tags: ["dry", "redness", "rosacea", "sensitive"],
     },
     {
-      img: "/Cleanser2.png", // ⭐ FIXED CAPITALIZATION
+      img: "/Cleanser2.png",
       name: "The Inkey List Salicylic Acid Cleanser",
       reason: "Commonly used for congestion and oil control.",
       tags: ["acne", "oily", "congestion"],
