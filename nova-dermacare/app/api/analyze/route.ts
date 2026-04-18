@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -17,6 +20,7 @@ export async function POST(req: Request) {
     const res = await fetch(FASTAPI_URL, {
       method: "POST",
       body: backendForm,
+      cache: "no-store"
     });
 
     if (!res.ok) {
