@@ -32,7 +32,6 @@ export default function ScanPage() {
     formData.append("file", file);
 
     try {
-      // ⭐ Calls your Render backend
       const res = await fetch("https://nova-backend-z5l9.onrender.com/predict", {
         method: "POST",
         body: formData,
@@ -43,7 +42,20 @@ export default function ScanPage() {
       }
 
       const result = await res.json();
-      localStorage.setItem("analysisResult", JSON.stringify(result));
+
+      // ⭐ Store ALL descriptive fields for the results page
+      const storedResult = {
+        acne_severity: result.acne_severity,
+        acne_description: result.acne_description,
+        model_label: result.model_label,
+        redness_level: result.redness_level,
+        rosacea: result.rosacea,
+        skin_type: result.skin_type,
+        lesion_type: result.lesion_type,
+        skin_health_score: result.skin_health_score,
+      };
+
+      localStorage.setItem("analysisResult", JSON.stringify(storedResult));
 
       router.push("/loading");
 
