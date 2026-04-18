@@ -137,7 +137,7 @@ export default function ResultsPage() {
       case "normal":
         return "Normal skin — balanced hydration and oil levels.";
       default:
-        return "Skin type could not be determined.";
+        return "Normal skin — balanced hydration and oil levels.";
     }
   }
 
