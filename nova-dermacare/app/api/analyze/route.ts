@@ -9,7 +9,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    const FASTAPI_URL = "https://judicial-overbid-rebuilt.ngrok-free.dev/predict";
+    const FASTAPI_URL = "https://nova-backend-z519.onrender.com/predict";
 
     const backendForm = new FormData();
     backendForm.append("file", file);
