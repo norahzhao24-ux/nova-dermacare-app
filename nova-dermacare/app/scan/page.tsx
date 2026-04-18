@@ -4,29 +4,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function ScanPage() {
-  const router = useRouter();
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  // Handle image upload preview
-  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = (e: any) => {
+    const selected = e.target.files[0];
+    if (!selected) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
-  }
-
-  // Send image to backend
-  async function analyzeImage() {
-    const input = document.getElementById("fileInput") as HTMLInputElement;
-    const file = input?.files?.[0];
-
-    if (!file) {
-      alert("Please upload an image first.");
+    const allowedTypes = ["image/jpeg", "image/png"];
+    if (!allowedTypes.includes(selected.type)) {
+      alert("We only support JPG and PNG formats. Thanks!");
       return;
     }
+
+    setFile(selected);
+    setPreview(URL.createObjectURL(selected));
+  };
+
+  const analyzeImage = async () => {
+    if (!file) return;
 
     setLoading(true);
 
@@ -34,112 +32,166 @@ export default function ScanPage() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("https://YOUR_BACKEND_URL/analyze", {
+      const res = await fetch("https://nova-backend-z5l9.onrender.com/predict", {
         method: "POST",
         body: formData,
       });
 
       if (!res.ok) {
-        throw new Error("Backend error");
+        throw new Error("API error");
       }
 
       const result = await res.json();
 
-      // Store raw backend response
-      localStorage.setItem("analysisResult", JSON.stringify(result));
+      // ⭐ Store ALL descriptive fields for the results page
+      const storedResult = {
+        acne_severity: result.acne_severity,
+        acne_description: result.acne_description,
+        model_label: result.model_label,
+        redness_level: result.redness_level,
+        rosacea: result.rosacea,
+        skin_type: result.skin_type,
+        lesion_type: result.lesion_type,
+        skin_health_score: result.skin_health_score,
+      };
 
-      // Redirect to results page
-      router.push("/results");
+      localStorage.setItem("analysisResult", JSON.stringify(storedResult));
+
+      router.push("/loading");
+
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong analyzing the image.");
+      console.error("Error:", err);
+      alert("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div style={pageWrapper}>
-      <div style={contentWrapper}>
-        <h1 style={title}>Scan Your Skin</h1>
-
-        {/* Image Preview */}
-        {imagePreview && (
-          <img
-            src={imagePreview}
-            alt="Preview"
-            style={{
-              width: "260px",
-              height: "260px",
-              objectFit: "cover",
-              borderRadius: "20px",
-              marginBottom: "20px",
-              border: "2px solid rgba(255,255,255,0.2)",
-            }}
-          />
-        )}
-
-        {/* Upload Input */}
-        <input
-          id="fileInput"
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          style={{ marginBottom: "20px" }}
-        />
-
-        {/* Analyze Button */}
-        <button
-          onClick={analyzeImage}
-          disabled={loading}
-          style={button}
+    <div
+      style={{
+        minHeight: "100vh",
+        padding: "40px 20px",
+        background: "linear-gradient(135deg, #0a0f2d, #0f1f4d, #1a3a7c)",
+        color: "white",
+        fontFamily: "Inter, sans-serif",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <div style={{ textAlign: "center", width: "100%", maxWidth: 450 }}>
+        <h1
+          style={{
+            fontSize: 40,
+            fontWeight: 700,
+            marginBottom: 30,
+            background: "linear-gradient(90deg, #7ecbff, #d0eaff)",
+            WebkitBackgroundClip: "text",
+            color: "transparent",
+          }}
         >
-          {loading ? "Analyzing..." : "Analyze Skin"}
-        </button>
+          Scan Your Skin
+        </h1>
+
+        <div
+          style={{
+            padding: 30,
+            borderRadius: 20,
+            background: "rgba(255, 255, 255, 0.06)",
+            backdropFilter: "blur(18px)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            boxShadow: "0 0 40px rgba(0, 150, 255, 0.15)",
+          }}
+        >
+          <button
+            onClick={() => router.push("/")}
+            style={{
+              width: "100%",
+              padding: "12px 20px",
+              borderRadius: 12,
+              background: "rgba(255,255,255,0.12)",
+              color: "white",
+              fontWeight: 600,
+              fontSize: 16,
+              border: "1px solid rgba(255,255,255,0.25)",
+              cursor: "pointer",
+              marginBottom: 20,
+              transition: "0.3s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.12)";
+            }}
+          >
+            ← Back to Home
+          </button>
+
+          <label
+            style={{
+              display: "block",
+              padding: "14px 20px",
+              borderRadius: 12,
+              background: "linear-gradient(90deg, #4db8ff, #7ecbff, #b0e0ff)",
+              color: "#0a0f2d",
+              fontWeight: 600,
+              fontSize: 18,
+              cursor: "pointer",
+              marginBottom: 15,
+              boxShadow: "0 0 20px rgba(100,180,255,0.4)",
+            }}
+          >
+            Choose Image
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
+          </label>
+
+          {file && (
+            <p style={{ marginBottom: 15, opacity: 0.8, fontSize: 15 }}>
+              Selected: <strong>{file.name}</strong>
+            </p>
+          )}
+
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              style={{
+                width: "100%",
+                borderRadius: 12,
+                marginBottom: 20,
+                boxShadow: "0 0 20px rgba(0,0,0,0.3)",
+              }}
+            />
+          )}
+
+          <button
+            onClick={analyzeImage}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "14px 20px",
+              borderRadius: 12,
+              background: "linear-gradient(90deg, #4db8ff, #7ecbff, #b0e0ff)",
+              color: "#0a0f2d",
+              fontWeight: 600,
+              fontSize: 18,
+              border: "none",
+              cursor: loading ? "default" : "pointer",
+              boxShadow: "0 0 20px rgba(100,180,255,0.4)",
+              transition: "0.3s",
+            }}
+          >
+            {loading ? "Analyzing..." : "Analyze with NOVA"}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-
-/* ------------------------------------------------------------
-   STYLES
------------------------------------------------------------- */
-
-const pageWrapper = {
-  minHeight: "100vh",
-  background: "#050b1d",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  color: "white",
-  fontFamily: "Inter, sans-serif",
-};
-
-const contentWrapper = {
-  textAlign: "center" as const,
-  padding: "40px 20px",
-  borderRadius: "20px",
-  background: "rgba(255,255,255,0.06)",
-  backdropFilter: "blur(12px)",
-  border: "1px solid rgba(255,255,255,0.15)",
-};
-
-const title = {
-  fontSize: "32px",
-  fontWeight: 700,
-  marginBottom: "20px",
-  background: "linear-gradient(90deg, #7ecbff, #d0eaff)",
-  WebkitBackgroundClip: "text",
-  color: "transparent",
-};
-
-const button = {
-  padding: "14px 28px",
-  borderRadius: "14px",
-  background: "linear-gradient(90deg, #4db8ff, #7ecbff, #b0e0ff)",
-  color: "#0a0f2d",
-  fontWeight: 600,
-  border: "none",
-  cursor: "pointer",
-  marginTop: "10px",
-};
